@@ -23,4 +23,4 @@ ENV PATH="/src/.venv/bin:$PATH"
 
 ENV PYTHONPATH=/app
 
-CMD ["sh", "-c", "uv run alembic upgrade head && uv run python src/main.py"]
+CMD ["sh", "-c", "uv run alembic upgrade head && uv run python main.py"]
