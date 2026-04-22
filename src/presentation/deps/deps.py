@@ -5,12 +5,12 @@ from src.infrastructure.repositories.order import OrderRepository
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import settings
+import src.settings
 
 
 def get_capashino_client():
     return CapashinoClient(
-        base_url=settings.CAPASHINO_BASE_URL, api_key=settings.CAPASHINO_API_KEY
+        base_url=src.settings.CAPASHINO_BASE_URL, api_key=src.settings.CAPASHINO_API_KEY
     )
 
 

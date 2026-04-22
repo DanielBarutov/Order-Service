@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-import settings
+import src.settings
 
-db_url = settings.POSTGRES_CONNECTION_STRING
+db_url = src.settings.POSTGRES_CONNECTION_STRING
 if not db_url:
     raise ValueError("POSTGRES_CONNECTION_STRING is not set")
 if db_url.startswith("postgres://"):
