@@ -1,0 +1,44 @@
+import uuid
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.models import OrderEntity
+from src.infrastructure.db.models import Order as OrderModel
+
+
+class OrderRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    @staticmethod
+    def _to_entity(order: OrderModel) -> OrderEntity:
+        return OrderEntity(
+            id=order.id,
+            user_id=order.user_id,
+            quantity=order.quantity,
+            item_id=order.item_id,
+            status=order.status,
+            created_at=order.created_at,
+            updated_at=order.updated_at,
+        )
+
+    async def create_order(self, order: OrderEntity) -> OrderEntity:
+        order_model = OrderModel(
+            id=order.id,
+            user_id=order.user_id,
+            quantity=order.quantity,
+            item_id=order.item_id,
+            status=order.status,
+            created_at=order.created_at,
+            updated_at=order.updated_at,
+        )
+        self.session.add(order_model)
+        await self.session.commit()
+        return order
+
+    async def get_order(self, order_id: uuid.UUID) -> OrderEntity:
+        order_model = await self.session.execute(
+            select(OrderModel).where(OrderModel.id == order_id)
+        )
+        order: OrderModel = order_model.scalar()
+        return self._to_entity(order)
