@@ -16,8 +16,15 @@ class KafkaProducer:
         await self._producer.stop()
 
     async def publish_event(self, topic: str, key: str, payload: dict) -> None:
-        await self._producer.send_and_wait(
-            topic=topic,
-            key=key.encode("utf-8"),
-            value=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        )
+        try:
+            print(
+                f"Publishing event to topic from producer.py: {topic}, key: {key}, payload: {payload}"
+            )
+            await self._producer.send_and_wait(
+                topic=topic,
+                key=key.encode("utf-8"),
+                value=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            )
+        except Exception as e:
+            print(f"Error publishing event: {e}")
+            raise
