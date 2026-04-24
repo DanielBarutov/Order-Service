@@ -25,4 +25,5 @@ class NotificationClient:
                 headers=headers,
             )
             response.raise_for_status()
-            return PaymentResponse.model_validate(response.json())
+            result: PaymentResponse = PaymentResponse.model_validate(response.json())
+            return result
