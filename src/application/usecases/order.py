@@ -5,7 +5,7 @@ from src.application.ports.capashino_client import (
     NotificationClientPort,
 )
 from src.application.ports.uow import UnitOfWorkPort
-from src.core.models import OrderEntity, ItemEntity
+from src.core.models import OrderEntity, ItemEntity, PaymentEntity
 
 
 class CreateOrderUseCase:
@@ -32,6 +32,13 @@ class CreateOrderUseCase:
             item: ItemEntity = await self.storage_client.get_item(order.item_id)
             if item.available_qty < order.quantity:
                 raise ValueError("Товара на складе недостаточно")
+            await self.payment_client.create_payment(
+                PaymentEntity(
+                    order_id=order.id,
+                    amount=item.price * order.quantity,
+                    idempotency_key=order.idempotency_key,
+                )
+            )
             order: OrderEntity = await uow.orders.create_order(order)
             await uow.commit()
             return order

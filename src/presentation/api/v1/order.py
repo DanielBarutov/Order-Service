@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-
 from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
 from src.core.models import OrderEntity
 from src.presentation.deps.deps import create_order_use_case, get_order_use_case

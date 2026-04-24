@@ -46,10 +46,17 @@ def order_uow(
 
 def create_order_use_case(
     uow: UnitOfWork = Depends(order_uow),
-    client: StorageClient = Depends(get_storage_client),
+    storage_client: StorageClient = Depends(get_storage_client),
+    payment_client: PaymentClient = Depends(get_payment_client),
+    notification_client: NotificationClient = Depends(get_notification_client),
 ) -> CreateOrderUseCase:
     """Usecase для создания заказа"""
-    return CreateOrderUseCase(unit_of_work=uow, client=client)
+    return CreateOrderUseCase(
+        unit_of_work=uow,
+        storage_client=storage_client,
+        payment_client=payment_client,
+        notification_client=notification_client,
+    )
 
 
 def get_order_use_case(
