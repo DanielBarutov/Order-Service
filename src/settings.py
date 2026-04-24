@@ -4,13 +4,7 @@ import dotenv
 dotenv.load_dotenv()
 
 # Capashino
-local_work = False
-
-if local_work is True:
-    STORAGE_BASE_URL = os.getenv("STORAGE_BASE_URL_LOCAL")
-else:
-    STORAGE_BASE_URL = os.getenv("STORAGE_BASE_URL")
-
+STORAGE_BASE_URL = os.getenv("STORAGE_BASE_URL")
 STORAGE_API_KEY = os.getenv("STORAGE_API_KEY")
 
 PAYMENT_BASE_URL = os.getenv("PAYMENT_BASE_URL")
@@ -19,6 +13,7 @@ PAYMENT_CALLBACK_URL = os.getenv("PAYMENT_CALLBACK_URL")
 
 NOTIFICATION_BASE_URL = os.getenv("NOTIFICATION_BASE_URL")
 NOTIFICATION_API_KEY = os.getenv("NOTIFICATION_API_KEY")
+
 
 # PostgreSQL
 POSTGRES_CONNECTION_STRING = os.getenv("POSTGRES_CONNECTION_STRING")

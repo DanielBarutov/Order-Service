@@ -39,8 +39,6 @@ async def create_order(
         )
     except ValueError:
         raise HTTPException(status_code=400, detail="Товар на складе недостаточно ):")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {e}")
 
 
 @router.get("/orders/{order_id}")
