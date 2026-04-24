@@ -32,5 +32,7 @@ class StorageClient:
                 headers=headers,
             )
             response.raise_for_status()
-            result = response.json()
+            result: ItemEntityResponse = ItemEntityResponse.model_validate(
+                response.json()
+            )
             return self._to_entity(result)

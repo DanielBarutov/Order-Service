@@ -42,5 +42,5 @@ class PaymentClient:
                 headers=headers,
             )
             response.raise_for_status()
-            result: PaymentResponse = response.json()
+            result: PaymentResponse = PaymentResponse.model_validate(response.json())
             return self._to_entity(result)
