@@ -1,3 +1,4 @@
+import decimal
 import uuid
 import datetime
 import dataclasses
@@ -46,3 +47,34 @@ class OrderEntity:
             status=OrderStatusEnum.CANCELLED,
             updated_at=utc_now(),
         )
+
+
+@dataclasses.dataclass
+class ItemEntity:
+    id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    name: str = dataclasses.field(default="")
+    price: decimal.Decimal = dataclasses.field(default=0)
+    available_qty: int = dataclasses.field(default=0)
+    created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
+
+
+@dataclasses.dataclass
+class PaymentEntity:
+    id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    user_id: str = dataclasses.field(default="")
+    order_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    amount: decimal.Decimal = dataclasses.field(default=0)
+    status: (
+        str  # PaymentStatusEnum = dataclasses.field(default=PaymentStatusEnum.PENDING)
+    )
+    idempotency_key: str | None = dataclasses.field(default=None)
+    created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
+
+
+@dataclasses.dataclass
+class NotificationEntity:
+    id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    user_id: str = dataclasses.field(default="")
+    message: str = dataclasses.field(default="")
+    reference_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)

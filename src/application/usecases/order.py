@@ -1,13 +1,25 @@
 import uuid
-from src.application.ports.capashino_client import CapashinoClientPort
+from src.application.ports.capashino_client import (
+    StorageClientPort,
+    PaymentClientPort,
+    NotificationClientPort,
+)
 from src.application.ports.uow import UnitOfWorkPort
-from src.core.models import OrderEntity
+from src.core.models import OrderEntity, ItemEntity
 
 
 class CreateOrderUseCase:
-    def __init__(self, unit_of_work: UnitOfWorkPort, client: CapashinoClientPort):
+    def __init__(
+        self,
+        unit_of_work: UnitOfWorkPort,
+        storage_client: StorageClientPort,
+        payment_client: PaymentClientPort,
+        notification_client: NotificationClientPort,
+    ):
         self._unit_of_work = unit_of_work
-        self.client = client
+        self.storage_client = storage_client
+        self.payment_client = payment_client
+        self.notification_client = notification_client
 
     async def execute(self, order: OrderEntity) -> OrderEntity:
         async with self._unit_of_work() as uow:
@@ -17,10 +29,10 @@ class CreateOrderUseCase:
                 )
                 if existing_order:
                     return existing_order
-            item = await self.client.get_item(order.item_id)
+            item: ItemEntity = await self.storage_client.get_item(order.item_id)
             if item.available_qty < order.quantity:
                 raise ValueError("Товара на складе недостаточно")
-            order = await uow.orders.create_order(order)
+            order: OrderEntity = await uow.orders.create_order(order)
             await uow.commit()
             return order
 
@@ -31,5 +43,5 @@ class GetOrderUseCase:
 
     async def execute(self, order_id: uuid.UUID) -> OrderEntity:
         async with self._unit_of_work() as uow:
-            order = await uow.orders.get_order(order_id)
+            order: OrderEntity = await uow.orders.get_order(order_id)
             return order

@@ -1,12 +1,12 @@
-import urllib.parse
 import uuid
+import urllib.parse
 
 import httpx
 
 from src.infrastructure.dto.item import ItemEntityResponse
 
 
-class CapashinoClient:
+class StorageClient:
     def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url
         self.api_key = api_key
