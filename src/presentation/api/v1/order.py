@@ -14,7 +14,7 @@ from src.presentation.shemas.order import (
 router = APIRouter()
 
 
-@router.post("/orders", statuts_code=status.HTTP_201_CREATED)
+@router.post("/orders", status_code=status.HTTP_201_CREATED)
 async def create_order(
     order: CreateOrderRequest,
     use_case: CreateOrderUseCase = Depends(create_order_use_case),
