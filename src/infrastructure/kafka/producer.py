@@ -10,10 +10,14 @@ class KafkaProducer:
         )
 
     async def start(self) -> None:
-        await self._producer.start()
+        if not self._producer:
+            await self._producer.start()
+        else:
+            print("Producer already started")
 
     async def stop(self) -> None:
-        await self._producer.stop()
+        if self._producer:
+            await self._producer.stop()
 
     async def publish_event(self, topic: str, key: str, payload: dict) -> None:
         try:
