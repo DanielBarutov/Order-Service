@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 RUN addgroup --system --gid 1000 appuser && \
@@ -19,7 +19,7 @@ RUN chown -R appuser:appuser /app
 
 USER appuser
 
-ENV PATH="/src/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH"
 
 ENV PYTHONPATH=/app
 
