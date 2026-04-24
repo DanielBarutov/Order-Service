@@ -1,10 +1,10 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.infrastructure.uow import UnitOfWork
 from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
 from src.infrastructure.db.session import get_session
 from src.infrastructure.clients.capashino import CapashinoClient
-from src.infrastructure.repositories.order import OrderRepository
 import src.settings
 
 
@@ -14,20 +14,20 @@ def get_capashino_client():
     )
 
 
-def order_repository(
+def order_uow(
     session: AsyncSession = Depends(get_session),
-) -> OrderRepository:
-    return OrderRepository(session=session)
+) -> UnitOfWork:
+    return UnitOfWork(session=session)
 
 
 def create_order_use_case(
-    repository: OrderRepository = Depends(order_repository),
+    uow: UnitOfWork = Depends(order_uow),
     client: CapashinoClient = Depends(get_capashino_client),
 ) -> CreateOrderUseCase:
-    return CreateOrderUseCase(repository=repository, client=client)
+    return CreateOrderUseCase(unit_of_work=uow, client=client)
 
 
 def get_order_use_case(
-    repository: OrderRepository = Depends(order_repository),
+    uow: UnitOfWork = Depends(order_uow),
 ) -> GetOrderUseCase:
-    return GetOrderUseCase(repository=repository)
+    return GetOrderUseCase(unit_of_work=uow)
