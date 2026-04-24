@@ -58,7 +58,17 @@ class UpdateOrderUseCase:
     def __init__(self, unit_of_work: UnitOfWorkPort):
         self._unit_of_work = unit_of_work
 
-    async def execute(self, order_id: uuid.UUID, status) -> OrderEntity:
+    async def execute(
+        self, order_id: uuid.UUID, status: str, error_message: str | None = None
+    ) -> OrderEntity:
         async with self._unit_of_work() as uow:
-            order: OrderEntity = await uow.orders.update_order(order_id, status)
+            if error_message and status == "failed":
+                order = await uow.orders.get_order(order_id)
+                order = order.to_cancelled()
+                await uow.orders.update_order(order)
+            if status == "succeeded":
+                order = await uow.orders.get_order(order_id)
+                order = order.to_paid()
+                await uow.orders.update_order(order)
+            await uow.commit()
             return order

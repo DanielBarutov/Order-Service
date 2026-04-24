@@ -4,8 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.infrastructure.db.session import get_session
 from src.infrastructure.uow import UnitOfWork
 
-from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
-
+from src.application.usecases.order import (
+    CreateOrderUseCase,
+    GetOrderUseCase,
+    UpdateOrderUseCase,
+)
 from src.infrastructure.clients.storage_client import StorageClient
 from src.infrastructure.clients.notification_client import NotificationClient
 from src.infrastructure.clients.payment_client import PaymentClient
@@ -64,3 +67,10 @@ def get_order_use_case(
 ) -> GetOrderUseCase:
     """Usecase для получения заказа"""
     return GetOrderUseCase(unit_of_work=uow)
+
+
+def update_order_use_case(
+    uow: UnitOfWork = Depends(order_uow),
+) -> UpdateOrderUseCase:
+    """Usecase для обновления заказа"""
+    return UpdateOrderUseCase(unit_of_work=uow)

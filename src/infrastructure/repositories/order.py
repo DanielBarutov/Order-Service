@@ -53,3 +53,16 @@ class OrderRepository:
         )
         order: OrderModel = order_model.scalar()
         return self._to_entity(order) if order else None
+
+    async def update_order(self, order: OrderEntity) -> None:
+        order_model = OrderModel(
+            id=order.id,
+            user_id=order.user_id,
+            quantity=order.quantity,
+            item_id=order.item_id,
+            idempotency_key=order.idempotency_key or None,
+            status=order.status,
+            created_at=order.created_at,
+            updated_at=order.updated_at,
+        )
+        self.session.merge(order_model)

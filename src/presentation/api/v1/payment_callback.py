@@ -11,4 +11,5 @@ async def payment_callback(request: PaymentCallbackRequestResponse):
     # Обновить статус заказа на CANCELLED при неуспешном платеже
     # Обеспечить идемпотентность обработки callback'ов
 
+    print("Получен callback платежа:", request.model_dump(mode="json"))
     return {"message": "Payment callback received"}
