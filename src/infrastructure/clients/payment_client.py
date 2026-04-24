@@ -38,7 +38,7 @@ class PaymentClient:
             )
             response = await client.post(
                 url,
-                json=payment_request.model_dump(),
+                json=payment_request.model_dump(mode="json"),
                 headers=headers,
             )
             response.raise_for_status()
