@@ -1,5 +1,6 @@
 import uuid
-from fastapi import APIRouter, Depends, status
+
+from fastapi import APIRouter, Depends, HTTPException, status
 
 
 from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
@@ -24,17 +25,22 @@ async def create_order(
         quantity=order.quantity,
         item_id=order.item_id,
     )
-    created_order = await use_case.execute(order_entity)
+    try:
+        created_order = await use_case.execute(order_entity)
 
-    return CreateOrderResponse(
-        id=created_order.id,
-        user_id=created_order.user_id,
-        quantity=created_order.quantity,
-        item_id=created_order.item_id,
-        status=created_order.status,
-        created_at=created_order.created_at,
-        updated_at=created_order.updated_at,
-    )
+        return CreateOrderResponse(
+            id=created_order.id,
+            user_id=created_order.user_id,
+            quantity=created_order.quantity,
+            item_id=created_order.item_id,
+            status=created_order.status,
+            created_at=created_order.created_at,
+            updated_at=created_order.updated_at,
+        )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Товар на складе недостаточно ):")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {e}")
 
 
 @router.get("/orders/{order_id}")

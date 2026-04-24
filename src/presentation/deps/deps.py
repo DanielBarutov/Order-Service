@@ -1,10 +1,10 @@
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
 from src.infrastructure.db.session import get_session
 from src.infrastructure.clients.capashino import CapashinoClient
 from src.infrastructure.repositories.order import OrderRepository
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 import src.settings
 
 
