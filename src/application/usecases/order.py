@@ -81,6 +81,13 @@ class UpdateOrderUseCase:
                 await uow.orders.update_order(order)
                 await uow.commit()
                 print("Публикуем событие на paid")
+                event_payload = {
+                    "event_type": "order.paid",
+                    "order_id": str(order.id),
+                    "item_id": str(order.item_id),
+                    "quantity": order.quantity,
+                    "idempotency_key": order.idempotency_key,
+                }
                 await self.broker.publish_event(
                     topic="student_system-order.events",
                     key=str(order.id),
