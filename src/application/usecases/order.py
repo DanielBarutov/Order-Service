@@ -70,5 +70,8 @@ class UpdateOrderUseCase:
                 order = await uow.orders.get_order(order_id)
                 order = order.to_paid()
                 await uow.orders.update_order(order)
+            else:
+                print(f"Неизвестный статус: {status}")
+                raise ValueError(f"Неизвестный статус: {status}")
             await uow.commit()
             return order
