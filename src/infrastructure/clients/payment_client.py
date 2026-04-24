@@ -16,9 +16,9 @@ class PaymentClient:
     @staticmethod
     def _to_entity(payment: PaymentResponse) -> PaymentEntity:
         return PaymentEntity(
-            id=payment.id,
+            id=str(payment.id),
             user_id=payment.user_id,
-            order_id=payment.order_id,
+            order_id=str(payment.order_id),
             amount=payment.amount,
             status=payment.status,
             idempotency_key=payment.idempotency_key,
@@ -31,7 +31,7 @@ class PaymentClient:
             url = urllib.parse.urljoin(self.base_url, "/api/payments")
             headers = {"X-API-Key": self.api_key}
             payment_request = PaymentRequest(
-                order_id=payment.order_id,
+                order_id=str(payment.order_id),
                 amount=payment.amount,
                 callback_url=self.callback_url,
                 idempotency_key=payment.idempotency_key,

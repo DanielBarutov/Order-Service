@@ -10,7 +10,7 @@ def retry_on_error(max_retries: int = 3):
                 try:
                     return await func(*args, **kwargs)
                 except Exception as e:
-                    print(f"Error: {e}")
+                    print(f"Ошибка при выполнении функции {func.__name__}: {e}")
                     await asyncio.sleep(1)
 
         return wrapper
