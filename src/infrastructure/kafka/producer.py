@@ -24,10 +24,13 @@ class KafkaProducer:
             print(
                 f"Publishing event to topic from producer.py: {topic}, key: {key}, payload: {payload}"
             )
-            await self._producer.send_and_wait(
+            metadata = await self._producer.send_and_wait(
                 topic=topic,
                 key=key.encode("utf-8"),
                 value=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            )
+            print(
+                f"sent topic={metadata.topic} partition={metadata.partition} offset={metadata.offset}"
             )
         except Exception as e:
             print(f"Error publishing event: {e}")
