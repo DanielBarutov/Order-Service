@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 import uvicorn
+
+from src.bootstrap import lifespan
 from src.presentation.api.router import router
 
-app = FastAPI(title="Order Service", version="0.1.0")
-
+app = FastAPI(title="Order Service", version="0.1.0", lifespan=lifespan)
 app.include_router(router)
 
 

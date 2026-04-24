@@ -5,6 +5,7 @@ from src.application.ports.capashino_client import (
     NotificationClientPort,
 )
 from src.application.ports.uow import UnitOfWorkPort
+from src.application.ports.broker import KafkaProducerPort
 from src.core.models import OrderEntity, ItemEntity, PaymentEntity
 
 
@@ -55,23 +56,41 @@ class GetOrderUseCase:
 
 
 class UpdateOrderUseCase:
-    def __init__(self, unit_of_work: UnitOfWorkPort):
+    def __init__(self, unit_of_work: UnitOfWorkPort, broker: KafkaProducerPort):
         self._unit_of_work = unit_of_work
+        self.broker = broker
 
     async def execute(
         self, order_id: uuid.UUID, status: str, error_message: str | None = None
     ) -> OrderEntity:
         async with self._unit_of_work() as uow:
+            event_payload = {}
             if error_message and status == "failed":
                 order = await uow.orders.get_order(order_id)
                 order = order.to_cancelled()
                 await uow.orders.update_order(order)
-            if status == "succeeded":
+                await uow.commit()
+            elif status == "succeeded":
                 order = await uow.orders.get_order(order_id)
                 order = order.to_paid()
                 await uow.orders.update_order(order)
+                await uow.commit()
+                await self.broker.publish_event(
+                    topic="student_system-order.events",
+                    key=str(order.id),
+                    payload=event_payload,
+                )
+            elif status == "shipped":
+                order = await uow.orders.get_order(order_id)
+                order = order.to_shipped()
+                await uow.orders.update_order(order)
+                await uow.commit()
+            elif status == "cancelled":
+                order = await uow.orders.get_order(order_id)
+                order = order.to_cancelled()
+                await uow.orders.update_order(order)
+                await uow.commit()
             else:
                 print(f"Неизвестный статус: {status}")
                 raise ValueError(f"Неизвестный статус: {status}")
-            await uow.commit()
             return order
