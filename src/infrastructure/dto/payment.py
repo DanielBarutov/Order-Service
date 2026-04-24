@@ -9,7 +9,7 @@ class PaymentRequest(pydantic.BaseModel):
     order_id: uuid.UUID
     amount: decimal.Decimal
     callback_url: pydantic.HttpUrl
-    idempotency_key: uuid.UUID | None = None
+    idempotency_key: str | None = None
 
 
 class PaymentResponse(pydantic.BaseModel):
@@ -18,5 +18,5 @@ class PaymentResponse(pydantic.BaseModel):
     order_id: uuid.UUID
     amount: decimal.Decimal
     status: str
-    idempotency_key: uuid.UUID | None = None
+    idempotency_key: str | None = None
     created_at: datetime.datetime
