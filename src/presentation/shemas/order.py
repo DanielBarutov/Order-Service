@@ -10,7 +10,7 @@ class CreateOrderRequest(pydantic.BaseModel):
     user_id: str
     quantity: int
     item_id: uuid.UUID
-    idempotency_key: uuid.UUID | None = None
+    idempotency_key: str | None = None
 
 
 class CreateOrderResponse(pydantic.BaseModel):

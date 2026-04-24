@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 
 from src.application.usecases.order import CreateOrderUseCase, GetOrderUseCase
@@ -14,7 +14,7 @@ from src.presentation.shemas.order import (
 router = APIRouter()
 
 
-@router.post("/orders")
+@router.post("/orders", statuts_code=status.HTTP_201_CREATED)
 async def create_order(
     order: CreateOrderRequest,
     use_case: CreateOrderUseCase = Depends(create_order_use_case),
