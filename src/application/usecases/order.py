@@ -65,6 +65,9 @@ class UpdateOrderUseCase:
     ) -> OrderEntity:
         async with self._unit_of_work() as uow:
             event_payload = {}
+            print(
+                f"Update order use case started: {order_id}, {status}, {error_message}"
+            )
             if error_message and status == "failed":
                 order = await uow.orders.get_order(order_id)
                 order = order.to_cancelled()
