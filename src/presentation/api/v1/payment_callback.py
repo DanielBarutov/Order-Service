@@ -12,6 +12,10 @@ async def payment_callback(
     request: PaymentCallbackRequestResponse,
     update_order_use_case: UpdateOrderUseCase = Depends(update_order_use_case),
 ):
-    await update_order_use_case.execute(request.order_id, request.status)
+    await update_order_use_case.execute(
+        request.order_id,
+        request.status,
+        request.error_message if request.error_message else None,
+    )
     print("Получен callback платежа:", request.model_dump(mode="json"))
     return {"message": "Payment callback received"}
