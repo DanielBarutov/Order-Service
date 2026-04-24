@@ -64,9 +64,7 @@ class PaymentEntity:
     user_id: str = dataclasses.field(default="")
     order_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
     amount: decimal.Decimal = dataclasses.field(default=0)
-    status: (
-        str  # PaymentStatusEnum = dataclasses.field(default=PaymentStatusEnum.PENDING)
-    )
+    status: str = dataclasses.field(default="")
     idempotency_key: str | None = dataclasses.field(default=None)
     created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
 

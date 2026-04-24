@@ -1,8 +1,8 @@
 import httpx
 import urllib.parse
 
-from infrastructure.dto.payment import PaymentRequest, PaymentResponse
-from infrastructure.clients.tools import retry_on_error
+from src.infrastructure.dto.payment import PaymentRequest, PaymentResponse
+from src.infrastructure.clients.tools import retry_on_error
 
 
 class NotificationClient:
