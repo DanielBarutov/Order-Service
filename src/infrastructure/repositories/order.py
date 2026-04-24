@@ -17,6 +17,7 @@ class OrderRepository:
             user_id=order.user_id,
             quantity=order.quantity,
             item_id=order.item_id,
+            idempotency_key=order.idempotency_key or None,
             status=order.status,
             created_at=order.created_at,
             updated_at=order.updated_at,
@@ -28,12 +29,12 @@ class OrderRepository:
             user_id=order.user_id,
             quantity=order.quantity,
             item_id=order.item_id,
+            idempotency_key=order.idempotency_key or None,
             status=order.status,
             created_at=order.created_at,
             updated_at=order.updated_at,
         )
         self.session.add(order_model)
-        await self.session.commit()
         return order
 
     async def get_order(self, order_id: uuid.UUID) -> OrderEntity:
@@ -42,3 +43,12 @@ class OrderRepository:
         )
         order: OrderModel = order_model.scalar()
         return self._to_entity(order)
+
+    async def get_order_by_idempotency_key(
+        self, idempotency_key: str
+    ) -> OrderEntity | None:
+        order_model = await self.session.execute(
+            select(OrderModel).where(OrderModel.idempotency_key == idempotency_key)
+        )
+        order: OrderModel = order_model.scalar()
+        return self._to_entity(order) if order else None

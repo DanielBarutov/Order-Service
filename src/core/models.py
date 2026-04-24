@@ -21,6 +21,7 @@ class OrderEntity:
     user_id: str = dataclasses.field(default="")
     quantity: int = dataclasses.field(default=0)
     item_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    idempotency_key: str | None = dataclasses.field(default=None)
     status: OrderStatusEnum = dataclasses.field(default=OrderStatusEnum.NEW)
     created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
     updated_at: datetime.datetime = dataclasses.field(default_factory=utc_now)

@@ -1,0 +1,12 @@
+import typing
+import uuid
+
+from src.core.models import OrderEntity
+
+
+class OrderRepositoryPort(typing.Protocol):
+    async def create_order(self, order: OrderEntity) -> OrderEntity: ...
+    async def get_order(self, order_id: uuid.UUID) -> OrderEntity: ...
+    async def get_order_by_idempotency_key(
+        self, idempotency_key: str
+    ) -> OrderEntity | None: ...

@@ -11,7 +11,7 @@ class UnitOfWork:
         self._session = session
 
     @contextlib.asynccontextmanager
-    async def __call__(self) -> None:
+    async def __call__(self):
         async with self._session as s:
             try:
                 yield _UnitOfWorkImplementation(s)
@@ -32,4 +32,4 @@ class _UnitOfWorkImplementation:
         return self._order_repo
 
     async def commit(self) -> None:
-        return self._session.commit()
+        return await self._session.commit()

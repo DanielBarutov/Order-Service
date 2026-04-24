@@ -1,6 +1,6 @@
 import uuid
 from src.application.ports.capashino_client import CapashinoClientPort
-from src.application.ports.order_uow import UnitOfWorkPort
+from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import OrderEntity
 
 
@@ -11,9 +11,15 @@ class CreateOrderUseCase:
 
     async def execute(self, order: OrderEntity) -> OrderEntity:
         async with self._unit_of_work() as uow:
+            if order.idempotency_key:
+                existing_order = await uow.orders.get_order_by_idempotency_key(
+                    order.idempotency_key
+                )
+                if existing_order:
+                    return existing_order
             item = await self.client.get_item(order.item_id)
             if item.available_qty < order.quantity:
-                raise ValueError("Item quantity is not enough")
+                raise ValueError("Товара на складе недостаточно")
             order = await uow.orders.create_order(order)
             await uow.commit()
             return order

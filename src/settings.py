@@ -4,7 +4,7 @@ import dotenv
 dotenv.load_dotenv()
 
 # Capashino
-local_work = True
+local_work = False
 
 if local_work is True:
     CAPASHINO_BASE_URL = os.getenv("CAPASHINO_BASE_URL_LOCAL")

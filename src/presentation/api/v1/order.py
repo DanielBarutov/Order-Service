@@ -24,6 +24,7 @@ async def create_order(
         user_id=order.user_id,
         quantity=order.quantity,
         item_id=order.item_id,
+        idempotency_key=order.idempotency_key or None,
     )
     try:
         created_order = await use_case.execute(order_entity)

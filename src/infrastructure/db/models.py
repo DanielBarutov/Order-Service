@@ -22,6 +22,7 @@ class Order(Base):
     user_id = Column(String, nullable=False)
     quantity = Column(Integer)
     item_id = Column(UUID, nullable=False)
+    idempotency_key = Column(String, nullable=True, unique=True)
     status = Column(
         Enum(OrderStatusEnum, name="statusenum"),
         nullable=False,
