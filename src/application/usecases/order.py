@@ -69,26 +69,31 @@ class UpdateOrderUseCase:
                 f"Update order use case started: {order_id}, {status}, {error_message}"
             )
             if error_message and status == "failed":
+                print("Обновляем заказ на cancelled")
                 order = await uow.orders.get_order(order_id)
                 order = order.to_cancelled()
                 await uow.orders.update_order(order)
                 await uow.commit()
             elif status == "succeeded":
+                print("Обновляем заказ на paid")
                 order = await uow.orders.get_order(order_id)
                 order = order.to_paid()
                 await uow.orders.update_order(order)
                 await uow.commit()
+                print("Публикуем событие на paid")
                 await self.broker.publish_event(
                     topic="student_system-order.events",
                     key=str(order.id),
                     payload=event_payload,
                 )
             elif status == "shipped":
+                print("Обновляем заказ на shipped")
                 order = await uow.orders.get_order(order_id)
                 order = order.to_shipped()
                 await uow.orders.update_order(order)
                 await uow.commit()
             elif status == "cancelled":
+                print("Обновляем заказ на cancelled")
                 order = await uow.orders.get_order(order_id)
                 order = order.to_cancelled()
                 await uow.orders.update_order(order)

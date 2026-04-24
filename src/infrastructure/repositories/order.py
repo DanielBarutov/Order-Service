@@ -65,4 +65,6 @@ class OrderRepository:
             created_at=order.created_at,
             updated_at=order.updated_at,
         )
-        self.session.merge(order_model)
+        print("Мерджим заказ в базу данных", order_model)
+        await self.session.merge(order_model)
+        print("Заказ мерджед")
