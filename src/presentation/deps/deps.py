@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -49,9 +49,9 @@ def order_uow(
     return UnitOfWork(session=session)
 
 
-def kafka_producer() -> KafkaProducer:
+def kafka_producer(request: Request) -> KafkaProducer:
     """Kafka producer для отправки событий"""
-    return KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
+    return request.app.state.kafka_producer
 
 
 def create_order_use_case(

@@ -46,10 +46,14 @@ def build_update_order_use_case(
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    producer = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    consumer = KafkaConsumer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
+    app.state.kafka_producer = KafkaProducer(
+        bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
+    )
+    app.state.kafka_consumer = KafkaConsumer(
+        bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
+    )
 
-    update_order_uc = build_update_order_use_case(producer)
+    update_order_uc = build_update_order_use_case(app.state.kafka_producer)
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, update_order_uc)
@@ -60,28 +64,11 @@ async def lifespan(app: FastAPI):
     consumer_task = None
 
     try:
-        for attempt in range(5):
-            try:
-                await producer.start()
-                break
-            except Exception as e:
-                print(f"Продюсер не запустился, попытка {attempt + 1}: {e}")
-                if attempt == 4:
-                    raise
-                await asyncio.sleep(10)
-
-        for attempt in range(5):
-            try:
-                await consumer.start()
-                break
-            except Exception as e:
-                print(f"Консюмер не запустился, попытка {attempt + 1}: {e}")
-                if attempt == 4:
-                    raise
-                await asyncio.sleep(10)
+        await app.state.kafka_producer.start()
+        await app.state.kafka_consumer.start()
 
         consumer_task = asyncio.create_task(
-            consumer.run(on_order_shipped, on_order_cancelled)
+            app.state.kafka_consumer.run(on_order_shipped, on_order_cancelled)
         )
 
         yield
@@ -93,7 +80,7 @@ async def lifespan(app: FastAPI):
                 await consumer_task
 
         with contextlib.suppress(Exception):
-            await consumer.stop()
+            await app.state.kafka_consumer.stop()
 
         with contextlib.suppress(Exception):
-            await producer.stop()
+            await app.state.kafka_producer.stop()
