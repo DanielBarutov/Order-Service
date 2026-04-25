@@ -1,7 +1,7 @@
 import asyncio
 
-from application.ports.broker import KafkaProducerPort
-from application.ports.uow import UnitOfWorkPort
+from src.application.ports.broker import KafkaProducerPort
+from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import OutboxEntity, OrderEntity
 
 

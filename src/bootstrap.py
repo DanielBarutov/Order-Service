@@ -5,9 +5,10 @@ from collections.abc import AsyncIterator
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.worker.inbox import InboxWorker
-from application.worker.outbox import OutboxWorker
+
 import src.settings
+from src.application.worker.inbox import InboxWorker
+from src.application.worker.outbox import OutboxWorker
 from src.infrastructure.db.session import AsyncSessionLocal
 from src.infrastructure.kafka.consumer import KafkaConsumer
 from src.infrastructure.kafka.producer import KafkaProducer

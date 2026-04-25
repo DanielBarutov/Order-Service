@@ -1,8 +1,8 @@
 import typing
 from contextlib import AbstractAsyncContextManager
 
-from application.ports.inbox_repo import InboxRepositoryPort
-from application.ports.outbox_repo import OutboxRepositoryPort
+from src.application.ports.inbox_repo import InboxRepositoryPort
+from src.application.ports.outbox_repo import OutboxRepositoryPort
 from src.application.ports.order_repo import OrderRepositoryPort
 
 

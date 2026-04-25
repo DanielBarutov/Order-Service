@@ -1,6 +1,6 @@
 import typing
 
-from core.models import InboxEntity
+from src.core.models import InboxEntity
 
 
 class InboxRepositoryPort(typing.Protocol):

@@ -1,7 +1,7 @@
 import asyncio
 
-from application.ports.uow import UnitOfWorkPort
-from core.models import InboxEntity, OrderEntity
+from src.application.ports.uow import UnitOfWorkPort
+from src.core.models import InboxEntity, OrderEntity
 
 
 class InboxWorker:

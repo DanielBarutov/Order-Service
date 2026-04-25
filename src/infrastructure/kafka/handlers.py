@@ -1,8 +1,8 @@
 import datetime
 import uuid
 
-from core.models import InboxStatusEnum, InboxEntity
-from infrastructure.uow import UnitOfWork
+from src.core.models import InboxStatusEnum, InboxEntity
+from src.infrastructure.uow import UnitOfWork
 
 
 def utc_now() -> datetime.datetime:
