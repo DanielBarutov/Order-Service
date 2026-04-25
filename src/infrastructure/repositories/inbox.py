@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.db.models import Inbox as InboxModel
-from core.models import InboxEntity, InboxStatusEnum
+from src.core.models import InboxEntity, InboxStatusEnum
 
 
 class InboxRepository:

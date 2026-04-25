@@ -2,8 +2,8 @@ import contextlib
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
-from infrastructure.repositories.inbox import InboxRepository
-from infrastructure.repositories.outbox import OutboxRepository
+from src.infrastructure.repositories.inbox import InboxRepository
+from src.infrastructure.repositories.outbox import OutboxRepository
 from src.infrastructure.repositories.order import OrderRepository
 from src.infrastructure.db.session import AsyncSessionLocal
 

@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    uow = UnitOfWork(session=AsyncSessionLocal())
+    uow = UnitOfWork(session=_session_scope)
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, uow)

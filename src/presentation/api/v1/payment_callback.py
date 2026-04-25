@@ -10,7 +10,7 @@ router = APIRouter()
 @router.post("/orders/payment-callback", status_code=status.HTTP_200_OK)
 async def payment_callback(
     request: PaymentCallbackRequestResponse,
-    update_order_use_case: OrderCallbackUseCase = Depends(order_callback_use_case),
+    order_callback_use_case: OrderCallbackUseCase = Depends(order_callback_use_case),
 ):
     await order_callback_use_case.execute(
         request.order_id,
