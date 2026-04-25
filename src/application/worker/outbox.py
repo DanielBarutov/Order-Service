@@ -24,7 +24,7 @@ class OutboxWorker:
                         await asyncio.sleep(10)
                         continue
                     for outbox_entity in outbox_entities:
-                        with self.broker() as broker:
+                        async with self.broker as broker:
                             await broker.send_message(
                                 topic=f"student_system-{outbox_entity.event_type}.events",
                                 key=str(outbox_entity.id),

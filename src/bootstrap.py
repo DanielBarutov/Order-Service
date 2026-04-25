@@ -36,18 +36,19 @@ async def lifespan(app: FastAPI):
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    uow = UnitOfWork(session=SessionContextAdapter(AsyncSessionLocal))
+    uow_for_inbox = UnitOfWork(session=SessionContextAdapter(AsyncSessionLocal))
+    uow_for_outbox = UnitOfWork(session=SessionContextAdapter(AsyncSessionLocal))
 
     async def on_order_shipped(event: dict) -> None:
-        await handle_order_shipped(event, uow)
+        await handle_order_shipped(event, uow_for_inbox)
 
     async def on_order_cancelled(event: dict) -> None:
-        await handle_order_cancelled(event, uow)
+        await handle_order_cancelled(event, uow_for_inbox)
 
     consumer_task = None
 
-    inbox_worker = InboxWorker(uow)
-    outbox_worker = OutboxWorker(uow, broker)
+    inbox_worker = InboxWorker(uow_for_inbox)
+    outbox_worker = OutboxWorker(uow_for_outbox, broker)
 
     inbox_task = asyncio.create_task(inbox_worker.run())
     outbox_task = asyncio.create_task(outbox_worker.run())
