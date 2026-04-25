@@ -33,8 +33,10 @@ class InboxWorker:
                         )
                         if inbox_entity.event_type == "order.shipped":
                             order = order.to_shipped()
+                            text = "SHIPPED"
                         elif inbox_entity.event_type == "order.cancelled":
                             order = order.to_cancelled()
+                            text = "CANCELLED"
                         else:
                             print(f"Неизвестный event_type: {inbox_entity.event_type}")
                             continue
@@ -43,7 +45,7 @@ class InboxWorker:
                         await self.notification_client.create_notification(
                             NotificationEntity(
                                 user_id=order.user_id,
-                                message=f"Your order has been {inbox_entity.event_type[6:]}!",
+                                message=text,
                                 reference_id=order.id,
                             ),
                             idempotency_key=order.idempotency_key

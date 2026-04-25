@@ -48,7 +48,7 @@ class OutboxWorker:
                         await uow.commit()
                         await self.notification_client.create_notification(
                             NotificationEntity(
-                                message="Your order has been paid!",
+                                message="PAID",
                                 reference_id=order.id,
                             ),
                             idempotency_key=order.idempotency_key + "_paid",

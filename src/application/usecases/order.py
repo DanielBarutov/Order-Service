@@ -51,7 +51,7 @@ class CreateOrderUseCase:
             await uow.commit()
             await self.notification_client.create_notification(
                 NotificationEntity(
-                    message="Your order has been created!",
+                    message="NEW",
                     reference_id=order.id,
                 ),
                 idempotency_key=order.idempotency_key + "_new",
