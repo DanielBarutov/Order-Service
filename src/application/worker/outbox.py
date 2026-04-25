@@ -34,7 +34,7 @@ class OutboxWorker:
                         print(f"Outbox обновлен: {outbox_entity}")
                         await uow.outbox.update(outbox_entity)
                         order: OrderEntity = await uow.orders.get_order(
-                            outbox_entity.id
+                            outbox_entity.payload["order_id"]
                         )
                         order = order.to_paid()
                         await uow.orders.update_order(order)

@@ -21,7 +21,7 @@ class InboxWorker:
                         continue
                     for inbox_entity in inbox_entities:
                         print(f"Inbox получен: {inbox_entity}")
-                        inbox_entity = inbox_entity.to_completed()
+                        inbox_entity: InboxEntity = inbox_entity.to_completed()
                         await uow.inbox.update(inbox_entity)
 
                         order: OrderEntity = await uow.orders.get_order(
