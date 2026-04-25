@@ -25,7 +25,7 @@ class InboxWorker:
                         await uow.inbox.update(inbox_entity)
 
                         order: OrderEntity = await uow.orders.get_order(
-                            inbox_entity.event_id
+                            inbox_entity.payload["order_id"]
                         )
                         if inbox_entity.event_type == "order.shipped":
                             order = order.to_shipped()

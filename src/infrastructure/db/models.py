@@ -40,7 +40,6 @@ class Inbox(Base):
     __tablename__ = "inbox"
 
     id = Column(UUID, primary_key=True, unique=True, default=lambda: uuid.uuid4())
-    event_id = Column(String, nullable=False)
     event_type = Column(String, nullable=False)
     payload = Column(JSON, nullable=False)
     status = Column(

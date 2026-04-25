@@ -91,7 +91,6 @@ class OutboxStatusEnum(enum.Enum):
 @dataclasses.dataclass
 class InboxEntity:
     id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
-    event_id: str = dataclasses.field(default="")
     event_type: str = dataclasses.field(default="")
     payload: dict = dataclasses.field(default_factory=dict)
     status: InboxStatusEnum = dataclasses.field(default=InboxStatusEnum.PENDING)
