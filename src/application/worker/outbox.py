@@ -39,7 +39,10 @@ class OutboxWorker:
                         order = order.to_paid()
                         await uow.orders.update_order(order)
                         await uow.commit()
-                        print(f"Outbox отправлен в репозиторий: {outbox_entity}")
+                        await asyncio.sleep(5)
+                        print(
+                            f"Outbox отправлен в репозиторий: {outbox_entity}, спим 5 секунд"
+                        )
             except Exception as e:
                 print(
                     f"Ошибка при отправке outbox: {e}, повторная попытка через 10 секунд"

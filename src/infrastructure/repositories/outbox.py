@@ -52,6 +52,6 @@ class OutboxRepository:
             status=outbox.status,
             created_at=outbox.created_at,
         )
-        self.session.merge(outbox_model)
+        await self.session.merge(outbox_model)
         print(f"Outbox мерджед: {outbox_model}")
         return self._to_entity(outbox_model)

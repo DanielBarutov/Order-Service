@@ -51,6 +51,6 @@ class InboxRepository:
             status=inbox.status,
             created_at=inbox.created_at,
         )
-        self.session.merge(inbox_model)
+        await self.session.merge(inbox_model)
         print("Inbox мерджед", inbox_model)
         return self._to_entity(inbox_model)

@@ -17,7 +17,6 @@ class UnitOfWork:
         async with self._session as s:
             try:
                 yield _UnitOfWorkImplementation(s)
-                await s.rollback()
 
             except Exception as e:
                 await s.rollback()
