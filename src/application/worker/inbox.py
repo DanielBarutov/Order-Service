@@ -1,6 +1,6 @@
 import asyncio
 
-from application.ports.capashino_client import NotificationClientPort
+from src.application.ports.capashino_client import NotificationClientPort
 from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import InboxEntity, OrderEntity, NotificationEntity
 

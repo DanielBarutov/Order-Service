@@ -4,7 +4,6 @@ import contextlib
 from fastapi import FastAPI
 
 
-from infrastructure.clients.notification_client import NotificationClient
 import src.settings
 from src.application.worker.inbox import InboxWorker
 from src.application.worker.outbox import OutboxWorker
@@ -16,6 +15,7 @@ from src.infrastructure.kafka.handlers import (
     handle_order_shipped,
 )
 from src.infrastructure.uow import UnitOfWork
+from src.infrastructure.clients.notification_client import NotificationClient
 
 
 class SessionContextAdapter:
