@@ -42,7 +42,7 @@ class NotificationClient:
             )
             response = await client.post(
                 url,
-                json=payload.model_dump(),
+                json=payload.model_dump(mode="json"),
                 headers=headers,
             )
             response.raise_for_status()
