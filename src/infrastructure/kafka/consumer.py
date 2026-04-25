@@ -42,3 +42,21 @@ class KafkaConsumer:
                 continue
             finally:
                 await self._consumer.commit()
+
+
+class FakeKafkaConsumer:
+    def __init__(self):
+        self._consumer = None
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+    async def run(
+        self,
+        on_order_shipped: typing.Callable[[dict], None],
+        on_order_cancelled: typing.Callable[[dict], None],
+    ) -> None:
+        pass

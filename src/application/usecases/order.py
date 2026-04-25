@@ -85,6 +85,7 @@ class OrderCallbackUseCase:
                         status=OutboxStatusEnum.PENDING,
                     )
                 )
+                await uow.commit()
                 return order
             else:
                 print(f"Неизвестный статус для callback: {status}")

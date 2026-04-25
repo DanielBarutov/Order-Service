@@ -47,3 +47,25 @@ class KafkaProducer:
 
     async def __aexit__(self, exc_type, exc_value, traceback) -> None:
         await self.stop()
+
+
+class FakeKafkaProducer:
+    def __init__(self):
+        self._producer = None
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+    async def send_message(
+        self, topic: str, key: str, payload: dict[str, typing.Any]
+    ) -> None:
+        pass
+
+    async def __aenter__(self) -> "FakeKafkaProducer":
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        pass
