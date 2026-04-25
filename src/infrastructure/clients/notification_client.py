@@ -1,7 +1,11 @@
 import httpx
 import urllib.parse
 
-from src.infrastructure.dto.payment import PaymentRequest, PaymentResponse
+from src.core.models import NotificationEntity
+from src.infrastructure.dto.notification import (
+    NotificationRequest,
+    NotificationResponse,
+)
 from src.infrastructure.clients.tools import retry_on_error
 
 
@@ -14,16 +18,35 @@ class NotificationClient:
         self.base_url = base_url
         self.api_key = api_key
 
+    @staticmethod
+    def _to_entity(notification: NotificationResponse) -> NotificationEntity:
+        return NotificationEntity(
+            id=notification.id,
+            user_id=notification.user_id,
+            message=notification.message,
+            reference_id=notification.reference_id,
+            created_at=notification.created_at,
+        )
+
     @retry_on_error(max_retries=3)
-    async def create_payment(self, payment: PaymentRequest) -> PaymentResponse:
+    async def create_notification(
+        self, notification: NotificationEntity, idempotency_key: str | None = None
+    ) -> NotificationResponse:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            url = urllib.parse.urljoin(self.base_url, "/api/payments")
+            url = urllib.parse.urljoin(self.base_url, "/api/notifications")
             headers = {"X-API-Key": self.api_key}
+            payload = NotificationRequest(
+                message=notification.message,
+                reference_id=notification.reference_id,
+                idempotency_key=idempotency_key,
+            )
             response = await client.post(
                 url,
-                json=payment.model_dump(),
+                json=payload.model_dump(),
                 headers=headers,
             )
             response.raise_for_status()
-            result: PaymentResponse = PaymentResponse.model_validate(response.json())
-            return result
+            result: NotificationResponse = NotificationResponse.model_validate(
+                response.json()
+            )
+            return self._to_entity(result)

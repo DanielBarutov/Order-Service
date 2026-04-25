@@ -1,12 +1,16 @@
 import asyncio
 
+from application.ports.capashino_client import NotificationClientPort
 from src.application.ports.uow import UnitOfWorkPort
-from src.core.models import InboxEntity, OrderEntity
+from src.core.models import InboxEntity, OrderEntity, NotificationEntity
 
 
 class InboxWorker:
-    def __init__(self, unit_of_work: UnitOfWorkPort):
+    def __init__(
+        self, unit_of_work: UnitOfWorkPort, notification_client: NotificationClientPort
+    ):
         self.unit_of_work = unit_of_work
+        self.notification_client = notification_client
 
     async def run(self) -> None:
         while True:
@@ -36,6 +40,14 @@ class InboxWorker:
                             continue
                         await uow.orders.update_order(order)
                         await uow.commit()
+                        await self.notification_client.create_notification(
+                            NotificationEntity(
+                                user_id=order.user_id,
+                                message=f"Your order has been {inbox_entity.event_type[6:]}!",
+                                reference_id=order.id,
+                            ),
+                            idempotency_key=order.idempotency_key,
+                        )
                         print(f"Inbox обновлен: {inbox_entity}")
             except Exception as e:
                 print(f"Ошибка при получении inbox: {e}")

@@ -6,7 +6,7 @@ import pydantic
 class NotificationRequest(pydantic.BaseModel):
     message: str
     reference_id: uuid.UUID
-    idempotency_key: uuid.UUID | None = None
+    idempotency_key: str | None = None
 
 
 class NotificationResponse(pydantic.BaseModel):

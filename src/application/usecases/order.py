@@ -7,6 +7,7 @@ from src.application.ports.capashino_client import (
 )
 from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import (
+    NotificationEntity,
     OrderEntity,
     ItemEntity,
     PaymentEntity,
@@ -48,6 +49,13 @@ class CreateOrderUseCase:
             )
             order: OrderEntity = await uow.orders.create_order(order)
             await uow.commit()
+            await self.notification_client.create_notification(
+                NotificationEntity(
+                    message="Your order has been created!",
+                    reference_id=order.id,
+                ),
+                idempotency_key=order.idempotency_key,
+            )
             return order
 
 

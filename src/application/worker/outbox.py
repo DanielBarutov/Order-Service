@@ -1,14 +1,21 @@
 import asyncio
 
 from src.application.ports.broker import KafkaProducerPort
+from src.application.ports.capashino_client import NotificationClientPort
 from src.application.ports.uow import UnitOfWorkPort
-from src.core.models import OutboxEntity, OrderEntity
+from src.core.models import OutboxEntity, OrderEntity, NotificationEntity
 
 
 class OutboxWorker:
-    def __init__(self, unit_of_work: UnitOfWorkPort, broker: KafkaProducerPort):
+    def __init__(
+        self,
+        unit_of_work: UnitOfWorkPort,
+        broker: KafkaProducerPort,
+        notification_client: NotificationClientPort,
+    ):
         self.unit_of_work = unit_of_work
         self.broker = broker
+        self.notification_client = notification_client
 
     async def run(self) -> None:
         print("Outbox worker стартует через 10 секунд")
@@ -39,6 +46,13 @@ class OutboxWorker:
                         order = order.to_paid()
                         await uow.orders.update_order(order)
                         await uow.commit()
+                        await self.notification_client.create_notification(
+                            NotificationEntity(
+                                message="Your order has been paid!",
+                                reference_id=order.id,
+                            ),
+                            idempotency_key=order.idempotency_key,
+                        )
                         await asyncio.sleep(5)
                         print(
                             f"Outbox отправлен в репозиторий: {outbox_entity}, спим 5 секунд"

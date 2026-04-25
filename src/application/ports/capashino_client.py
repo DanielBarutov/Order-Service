@@ -13,6 +13,6 @@ class PaymentClientPort(typing.Protocol):
 
 
 class NotificationClientPort(typing.Protocol):
-    async def send_notification(
-        self, notification: NotificationEntity
+    async def create_notification(
+        self, notification: NotificationEntity, idempotency_key: str | None = None
     ) -> NotificationEntity: ...

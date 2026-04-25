@@ -4,6 +4,7 @@ import contextlib
 from fastapi import FastAPI
 
 
+from infrastructure.clients.notification_client import NotificationClient
 import src.settings
 from src.application.worker.inbox import InboxWorker
 from src.application.worker.outbox import OutboxWorker
@@ -38,6 +39,10 @@ async def lifespan(app: FastAPI):
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
     uow_for_inbox = UnitOfWork(session=SessionContextAdapter(AsyncSessionLocal))
     uow_for_outbox = UnitOfWork(session=SessionContextAdapter(AsyncSessionLocal))
+    notification_client = NotificationClient(
+        base_url=src.settings.NOTIFICATION_BASE_URL,
+        api_key=src.settings.NOTIFICATION_API_KEY,
+    )
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, uow_for_inbox)
@@ -47,8 +52,8 @@ async def lifespan(app: FastAPI):
 
     consumer_task = None
 
-    inbox_worker = InboxWorker(uow_for_inbox)
-    outbox_worker = OutboxWorker(uow_for_outbox, broker)
+    inbox_worker = InboxWorker(uow_for_inbox, notification_client)
+    outbox_worker = OutboxWorker(uow_for_outbox, broker, notification_client)
 
     inbox_task = asyncio.create_task(inbox_worker.run())
     outbox_task = asyncio.create_task(outbox_worker.run())
