@@ -26,7 +26,7 @@ class OutboxWorker:
                     for outbox_entity in outbox_entities:
                         async with self.broker as broker:
                             await broker.send_message(
-                                topic=f"student_system-{outbox_entity.event_type}.events",
+                                topic="student_system-order.events",
                                 key=str(outbox_entity.id),
                                 payload=outbox_entity.payload,
                             )
