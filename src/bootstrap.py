@@ -7,7 +7,7 @@ from fastapi import FastAPI
 import src.settings
 from src.application.worker.inbox import InboxWorker
 from src.application.worker.outbox import OutboxWorker
-from src.infrastructure.db.session import get_session
+from src.infrastructure.db.session import AsyncSessionLocal
 from src.infrastructure.kafka.consumer import KafkaConsumer
 from src.infrastructure.kafka.producer import KafkaProducer
 from src.infrastructure.kafka.handlers import (
@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    uow = UnitOfWork(session=get_session())
+    uow = UnitOfWork(session=AsyncSessionLocal)
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, uow)
