@@ -1,7 +1,9 @@
 import asyncio
+from collections.abc import AsyncIterator
 import contextlib
 
 from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 import src.settings
@@ -18,12 +20,22 @@ from src.infrastructure.uow import UnitOfWork
 
 
 @contextlib.asynccontextmanager
+async def _session_scope() -> AsyncIterator[AsyncSession]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+
+
+@contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.kafka_consumer = KafkaConsumer(
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    uow = UnitOfWork(session=AsyncSessionLocal)
+    uow = UnitOfWork(session=_session_scope())
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, uow)
