@@ -9,7 +9,7 @@ from src.infrastructure.kafka.producer import KafkaProducer
 from src.application.usecases.order import (
     CreateOrderUseCase,
     GetOrderUseCase,
-    UpdateOrderUseCase,
+    UpdateOrderCallbackUseCase,
 )
 from src.infrastructure.clients.storage_client import StorageClient
 from src.infrastructure.clients.notification_client import NotificationClient
@@ -79,6 +79,6 @@ def get_order_use_case(
 def update_order_use_case(
     uow: UnitOfWork = Depends(order_uow),
     broker: KafkaProducer = Depends(kafka_producer),
-) -> UpdateOrderUseCase:
+) -> UpdateOrderCallbackUseCase:
     """Usecase для обновления заказа"""
-    return UpdateOrderUseCase(unit_of_work=uow, broker=broker)
+    return UpdateOrderCallbackUseCase(unit_of_work=uow, broker=broker)

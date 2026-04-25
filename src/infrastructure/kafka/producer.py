@@ -1,25 +1,29 @@
 import json
-
+import typing
 from aiokafka import AIOKafkaProducer
 
 
 class KafkaProducer:
     def __init__(self, bootstrap_servers: str) -> None:
-        self._producer = AIOKafkaProducer(
-            bootstrap_servers=bootstrap_servers, acks="all"
-        )
+        self._producer: AIOKafkaProducer | None = None
+        self._bootstrap_servers = bootstrap_servers
 
     async def start(self) -> None:
-        if not self._producer:
-            await self._producer.start()
-        else:
-            print("Producer already started")
+        self._producer = AIOKafkaProducer(
+            bootstrap_servers=self._bootstrap_servers, acks="all"
+        )
+        await self._producer.start()
 
     async def stop(self) -> None:
         if self._producer:
             await self._producer.stop()
+            self._producer = None
 
-    async def publish_event(self, topic: str, key: str, payload: dict) -> None:
+    async def send_message(
+        self, topic: str, key: str, payload: dict[str, typing.Any]
+    ) -> None:
+        if not self._producer:
+            raise RuntimeError("Producer not started")
         try:
             print(
                 f"Publishing event to topic from producer.py: {topic}, key: {key}, payload: {payload}"
@@ -35,3 +39,10 @@ class KafkaProducer:
         except Exception as e:
             print(f"Error publishing event: {e}")
             raise
+
+    async def __aenter__(self) -> "KafkaProducer":
+        await self.start()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        await self.stop()

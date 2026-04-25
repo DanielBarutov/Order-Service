@@ -55,8 +55,10 @@ class GetOrderUseCase:
             return order
 
 
-class UpdateOrderUseCase:
-    def __init__(self, unit_of_work: UnitOfWorkPort, broker: KafkaProducerPort):
+class UpdateOrderCallbackUseCase:
+    def __init__(
+        self, unit_of_work: UnitOfWorkPort, broker: KafkaProducerPort | None = None
+    ):
         self._unit_of_work = unit_of_work
         self.broker = broker
 
@@ -68,13 +70,7 @@ class UpdateOrderUseCase:
             print(
                 f"Update order use case started: {order_id}, {status}, {error_message}"
             )
-            if error_message and status == "failed":
-                print("Обновляем заказ на cancelled")
-                order = await uow.orders.get_order(order_id)
-                order = order.to_cancelled()
-                await uow.orders.update_order(order)
-                await uow.commit()
-            elif status == "succeeded":
+            if status == "succeeded":
                 print("Обновляем заказ на paid")
                 order = await uow.orders.get_order(order_id)
                 order = order.to_paid()
@@ -88,24 +84,38 @@ class UpdateOrderUseCase:
                     "quantity": order.quantity,
                     "idempotency_key": order.idempotency_key,
                 }
-                await self.broker.publish_event(
-                    topic="student_system-order.events",
-                    key=str(order.id),
-                    payload=event_payload,
-                )
-            elif status == "shipped":
-                print("Обновляем заказ на shipped")
-                order = await uow.orders.get_order(order_id)
-                order = order.to_shipped()
-                await uow.orders.update_order(order)
-                await uow.commit()
-            elif status == "cancelled":
-                print("Обновляем заказ на cancelled")
-                order = await uow.orders.get_order(order_id)
-                order = order.to_cancelled()
-                await uow.orders.update_order(order)
-                await uow.commit()
+                if self.broker:
+                    async with self.broker as broker:
+                        await broker.send_message(
+                            topic="student_system-order.events",
+                            key=str(order.id),
+                            payload=event_payload,
+                        )
+
             else:
                 print(f"Неизвестный статус: {status}")
                 raise ValueError(f"Неизвестный статус: {status}")
+            return order
+
+
+class UpdateOrderUseCase:
+    def __init__(self, unit_of_work: UnitOfWorkPort):
+        self._unit_of_work = unit_of_work
+
+    async def execute(
+        self, order_id: uuid.UUID, status: str, error_message: str | None = None
+    ) -> OrderEntity:
+        async with self._unit_of_work() as uow:
+            order = await uow.orders.get_order(order_id)
+            order = (
+                order.to_cancelled()
+                if status == "cancelled"
+                else order.to_shipped()
+                if status == "shipped"
+                else order.to_paid()
+                if status == "paid"
+                else order
+            )
+            await uow.orders.update_order(order)
+            await uow.commit()
             return order

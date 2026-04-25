@@ -13,7 +13,6 @@ from src.infrastructure.kafka.handlers import (
     handle_order_cancelled,
     handle_order_shipped,
 )
-from src.infrastructure.kafka.producer import KafkaProducer
 from src.infrastructure.uow import UnitOfWork
 
 
@@ -27,33 +26,15 @@ async def _session_scope() -> AsyncIterator[AsyncSession]:
             raise
 
 
-def build_update_order_use_case(
-    producer: KafkaProducer,
-) -> UpdateOrderUseCase:
-    class _UowFactory:
-        def __call__(self):
-            @contextlib.asynccontextmanager
-            async def _ctx():
-                async with _session_scope() as session:
-                    uow = UnitOfWork(session=session)
-                    async with uow() as impl:
-                        yield impl
-
-            return _ctx()
-
-    return UpdateOrderUseCase(unit_of_work=_UowFactory(), broker=producer)
-
-
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.kafka_producer = KafkaProducer(
-        bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
-    )
     app.state.kafka_consumer = KafkaConsumer(
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
 
-    update_order_uc = build_update_order_use_case(app.state.kafka_producer)
+    update_order_uc = UpdateOrderUseCase(
+        unit_of_work=UnitOfWork(session=AsyncSessionLocal())
+    )
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, update_order_uc)
@@ -64,7 +45,6 @@ async def lifespan(app: FastAPI):
     consumer_task = None
 
     try:
-        await app.state.kafka_producer.start()
         await app.state.kafka_consumer.start()
 
         consumer_task = asyncio.create_task(
@@ -81,6 +61,3 @@ async def lifespan(app: FastAPI):
 
         with contextlib.suppress(Exception):
             await app.state.kafka_consumer.stop()
-
-        with contextlib.suppress(Exception):
-            await app.state.kafka_producer.stop()

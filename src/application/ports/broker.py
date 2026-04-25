@@ -2,4 +2,6 @@ import typing
 
 
 class KafkaProducerPort(typing.Protocol):
-    async def publish_event(self, topic: str, key: str, payload: dict) -> None: ...
+    async def send_message(
+        self, topic: str, key: str, payload: dict[str, typing.Any]
+    ) -> None: ...
