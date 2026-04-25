@@ -1,15 +1,13 @@
 import asyncio
 import contextlib
-from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 import src.settings
 from src.application.worker.inbox import InboxWorker
 from src.application.worker.outbox import OutboxWorker
-from src.infrastructure.db.session import AsyncSessionLocal
+from src.infrastructure.db.session import get_session
 from src.infrastructure.kafka.consumer import KafkaConsumer
 from src.infrastructure.kafka.producer import KafkaProducer
 from src.infrastructure.kafka.handlers import (
@@ -20,22 +18,12 @@ from src.infrastructure.uow import UnitOfWork
 
 
 @contextlib.asynccontextmanager
-async def _session_scope() -> AsyncIterator[AsyncSession]:
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        except Exception:
-            await session.rollback()
-            raise
-
-
-@contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.kafka_consumer = KafkaConsumer(
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
     broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-    uow = UnitOfWork(session=_session_scope)
+    uow = UnitOfWork(session=get_session())
 
     async def on_order_shipped(event: dict) -> None:
         await handle_order_shipped(event, uow)
