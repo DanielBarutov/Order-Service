@@ -46,6 +46,7 @@ class NotificationClient:
                 headers=headers,
             )
             response.raise_for_status()
+            print("Сообщение отправлено с idempotency_key: ", idempotency_key)
             result: NotificationResponse = NotificationResponse.model_validate(
                 response.json()
             )

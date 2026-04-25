@@ -54,7 +54,7 @@ class CreateOrderUseCase:
                     message="Your order has been created!",
                     reference_id=order.id,
                 ),
-                idempotency_key=order.idempotency_key,
+                idempotency_key=order.idempotency_key + "_new",
             )
             return order
 

@@ -51,7 +51,7 @@ class OutboxWorker:
                                 message="Your order has been paid!",
                                 reference_id=order.id,
                             ),
-                            idempotency_key=order.idempotency_key,
+                            idempotency_key=order.idempotency_key + "_paid",
                         )
                         await asyncio.sleep(5)
                         print(

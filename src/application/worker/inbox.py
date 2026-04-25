@@ -46,7 +46,9 @@ class InboxWorker:
                                 message=f"Your order has been {inbox_entity.event_type[6:]}!",
                                 reference_id=order.id,
                             ),
-                            idempotency_key=order.idempotency_key,
+                            idempotency_key=order.idempotency_key
+                            + "_"
+                            + inbox_entity.event_type[6:],
                         )
                         print(f"Inbox обновлен: {inbox_entity}")
             except Exception as e:
