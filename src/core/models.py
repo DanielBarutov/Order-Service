@@ -76,3 +76,48 @@ class NotificationEntity:
     message: str = dataclasses.field(default="")
     reference_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
     created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
+
+
+class InboxStatusEnum(enum.Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+
+
+class OutboxStatusEnum(enum.Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+
+
+@dataclasses.dataclass
+class InboxEntity:
+    id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    event_id: str = dataclasses.field(default="")
+    event_type: str = dataclasses.field(default="")
+    payload: dict = dataclasses.field(default_factory=dict)
+    status: InboxStatusEnum = dataclasses.field(default=InboxStatusEnum.PENDING)
+    completed_at: datetime.datetime | None = dataclasses.field(default=None)
+    created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
+
+    def to_completed(self) -> "InboxEntity":
+        return dataclasses.replace(
+            self,
+            status=InboxStatusEnum.COMPLETED,
+            completed_at=utc_now(),
+        )
+
+
+@dataclasses.dataclass
+class OutboxEntity:
+    id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
+    event_type: str = dataclasses.field(default="")
+    payload: dict = dataclasses.field(default_factory=dict)
+    status: OutboxStatusEnum = dataclasses.field(default=OutboxStatusEnum.PENDING)
+    completed_at: datetime.datetime | None = dataclasses.field(default=None)
+    created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
+
+    def to_completed(self) -> "OutboxEntity":
+        return dataclasses.replace(
+            self,
+            status=OutboxStatusEnum.COMPLETED,
+            completed_at=utc_now(),
+        )

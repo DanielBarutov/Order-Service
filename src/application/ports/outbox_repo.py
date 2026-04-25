@@ -1,0 +1,9 @@
+import typing
+
+from src.core.models import OutboxEntity
+
+
+class OutboxRepositoryPort(typing.Protocol):
+    async def create(self, outbox: OutboxEntity) -> OutboxEntity: ...
+    async def get_pending_outbox(self) -> list[OutboxEntity]: ...
+    async def update(self, outbox: OutboxEntity) -> OutboxEntity: ...

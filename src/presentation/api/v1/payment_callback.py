@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
-from src.application.usecases.order import UpdateOrderUseCase
-from src.presentation.deps.deps import update_order_use_case
+from src.application.usecases.order import OrderCallbackUseCase
+from src.presentation.deps.deps import order_callback_use_case
 from src.presentation.shemas.callback_payment import PaymentCallbackRequestResponse
 
 router = APIRouter()
@@ -10,9 +10,9 @@ router = APIRouter()
 @router.post("/orders/payment-callback", status_code=status.HTTP_200_OK)
 async def payment_callback(
     request: PaymentCallbackRequestResponse,
-    update_order_use_case: UpdateOrderUseCase = Depends(update_order_use_case),
+    update_order_use_case: OrderCallbackUseCase = Depends(order_callback_use_case),
 ):
-    await update_order_use_case.execute(
+    await order_callback_use_case.execute(
         request.order_id,
         request.status,
         request.error_message if request.error_message else None,

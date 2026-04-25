@@ -4,12 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.db.session import get_session
 from src.infrastructure.uow import UnitOfWork
-from src.infrastructure.kafka.producer import KafkaProducer
 
 from src.application.usecases.order import (
     CreateOrderUseCase,
     GetOrderUseCase,
-    UpdateOrderCallbackUseCase,
+    OrderCallbackUseCase,
 )
 from src.infrastructure.clients.storage_client import StorageClient
 from src.infrastructure.clients.notification_client import NotificationClient
@@ -49,11 +48,6 @@ def order_uow(
     return UnitOfWork(session=session)
 
 
-def kafka_producer() -> KafkaProducer:
-    """Kafka producer для отправки событий"""
-    return KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
-
-
 def create_order_use_case(
     uow: UnitOfWork = Depends(order_uow),
     storage_client: StorageClient = Depends(get_storage_client),
@@ -76,9 +70,8 @@ def get_order_use_case(
     return GetOrderUseCase(unit_of_work=uow)
 
 
-def update_order_use_case(
+def order_callback_use_case(
     uow: UnitOfWork = Depends(order_uow),
-    broker: KafkaProducer = Depends(kafka_producer),
-) -> UpdateOrderCallbackUseCase:
+) -> OrderCallbackUseCase:
     """Usecase для обновления заказа"""
-    return UpdateOrderCallbackUseCase(unit_of_work=uow, broker=broker)
+    return OrderCallbackUseCase(unit_of_work=uow)

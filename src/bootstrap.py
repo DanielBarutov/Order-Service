@@ -5,10 +5,12 @@ from collections.abc import AsyncIterator
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from application.worker.inbox import InboxWorker
+from application.worker.outbox import OutboxWorker
 import src.settings
-from src.application.usecases.order import UpdateOrderUseCase
 from src.infrastructure.db.session import AsyncSessionLocal
 from src.infrastructure.kafka.consumer import KafkaConsumer
+from src.infrastructure.kafka.producer import KafkaProducer
 from src.infrastructure.kafka.handlers import (
     handle_order_cancelled,
     handle_order_shipped,
@@ -31,18 +33,22 @@ async def lifespan(app: FastAPI):
     app.state.kafka_consumer = KafkaConsumer(
         bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS
     )
-
-    update_order_uc = UpdateOrderUseCase(
-        unit_of_work=UnitOfWork(session=AsyncSessionLocal())
-    )
+    broker = KafkaProducer(bootstrap_servers=src.settings.KAFKA_BOOTSTRAP_SERVERS)
+    uow = UnitOfWork(session=AsyncSessionLocal())
 
     async def on_order_shipped(event: dict) -> None:
-        await handle_order_shipped(event, update_order_uc)
+        await handle_order_shipped(event, uow)
 
     async def on_order_cancelled(event: dict) -> None:
-        await handle_order_cancelled(event, update_order_uc)
+        await handle_order_cancelled(event, uow)
 
     consumer_task = None
+
+    inbox_worker = InboxWorker(uow)
+    outbox_worker = OutboxWorker(uow, broker)
+
+    inbox_task = asyncio.create_task(inbox_worker.run())
+    outbox_task = asyncio.create_task(outbox_worker.run())
 
     try:
         await app.state.kafka_consumer.start()
@@ -61,3 +67,13 @@ async def lifespan(app: FastAPI):
 
         with contextlib.suppress(Exception):
             await app.state.kafka_consumer.stop()
+
+        if inbox_task:
+            inbox_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await inbox_task
+
+        if outbox_task:
+            outbox_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await outbox_task

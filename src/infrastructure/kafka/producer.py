@@ -1,5 +1,6 @@
 import json
 import typing
+
 from aiokafka import AIOKafkaProducer
 
 

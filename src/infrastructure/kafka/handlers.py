@@ -1,22 +1,37 @@
+import datetime
 import uuid
 
-from src.infrastructure.ports.update_usecase import UpdateOrderUseCasePort
+from core.models import InboxStatusEnum, InboxEntity
+from infrastructure.uow import UnitOfWork
 
 
-async def handle_order_shipped(event: dict, update_uc: UpdateOrderUseCasePort) -> None:
-    print("Получено событие о доставке заказа")
-    await update_uc.execute(
-        order_id=uuid.UUID(event["order_id"]),
-        status="shipped",
-    )
+def utc_now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
-async def handle_order_cancelled(
-    event: dict, update_uc: UpdateOrderUseCasePort
-) -> None:
+async def handle_order_shipped(event: dict, unit_of_work: UnitOfWork) -> None:
+    print("Получено событие о доставке заказа и записываем в outbox")
+    async with unit_of_work() as uow:
+        inbox = InboxEntity(
+            id=uuid.uuid4(),
+            event_type="order.shipped",
+            payload=event,
+            status=InboxStatusEnum.PENDING,
+            created_at=utc_now(),
+        )
+        await uow.inbox.create(inbox)
+        await uow.commit()
+
+
+async def handle_order_cancelled(event: dict, unit_of_work: UnitOfWork) -> None:
     print("Получено событие о отмене заказа")
-    await update_uc.execute(
-        order_id=uuid.UUID(event["order_id"]),
-        status="cancelled",
-        error_message=event.get("reason"),
-    )
+    async with unit_of_work() as uow:
+        inbox = InboxEntity(
+            id=uuid.uuid4(),
+            event_type="order.cancelled",
+            payload=event,
+            status=InboxStatusEnum.PENDING,
+            created_at=utc_now(),
+        )
+        await uow.inbox.create(inbox)
+        await uow.commit()

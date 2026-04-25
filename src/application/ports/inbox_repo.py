@@ -1,0 +1,9 @@
+import typing
+
+from core.models import InboxEntity
+
+
+class InboxRepositoryPort(typing.Protocol):
+    async def create(self, inbox: InboxEntity) -> InboxEntity: ...
+    async def get_pending_inbox(self) -> list[InboxEntity]: ...
+    async def update(self, inbox: InboxEntity) -> InboxEntity: ...

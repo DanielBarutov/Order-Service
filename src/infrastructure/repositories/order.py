@@ -42,6 +42,8 @@ class OrderRepository:
         order_model = await self.session.execute(
             select(OrderModel).where(OrderModel.id == order_id)
         )
+        if not order_model:
+            raise ValueError(f"Заказ с id {order_id} не найден")
         order: OrderModel = order_model.scalar()
         return self._to_entity(order)
 
