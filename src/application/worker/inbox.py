@@ -41,18 +41,18 @@ class InboxWorker:
                                     inbox_entity.retry += 1
                             else:
                                 inbox_entity: InboxEntity = inbox_entity.to_completed()
-                            if inbox_entity.event_type == "order.shipped":
-                                order = order.to_shipped()
-                                text = "SHIPPED"
-                            elif inbox_entity.event_type == "order.cancelled":
-                                order = order.to_cancelled()
-                                text = "CANCELLED"
-                            else:
-                                logger.info(
-                                    "Был получен статус, который мы не обрабатываем: %s",
-                                    inbox_entity.event_type,
-                                )
-                                continue
+                                if inbox_entity.event_type == "order.shipped":
+                                    order = order.to_shipped()
+                                    text = "SHIPPED"
+                                elif inbox_entity.event_type == "order.cancelled":
+                                    order = order.to_cancelled()
+                                    text = "CANCELLED"
+                                else:
+                                    logger.info(
+                                        "Был получен статус, который мы не обрабатываем: %s",
+                                        inbox_entity.event_type,
+                                    )
+                                    continue
                         except Exception as e:
                             logger.error(
                                 "Ошибка при обработке Inbox, но продолжаем работу: %s",
