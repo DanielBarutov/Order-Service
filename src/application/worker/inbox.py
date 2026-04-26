@@ -37,6 +37,10 @@ class InboxWorker:
                             if order is None:
                                 if inbox_entity.retry > 3:
                                     inbox_entity: InboxEntity = inbox_entity.to_failed()
+                                    logger.info(
+                                        "Inbox c id=%s, был выставлен статус FAILED после 3 попыток",
+                                        inbox_entity.id,
+                                    )
                                 else:
                                     inbox_entity.retry += 1
                             else:
@@ -53,6 +57,18 @@ class InboxWorker:
                                         inbox_entity.event_type,
                                     )
                                     continue
+                                await uow.orders.update_order(order)
+                                await uow.commit()
+                                await self.notification_client.create_notification(
+                                    NotificationEntity(
+                                        user_id=order.user_id,
+                                        message=text,
+                                        reference_id=order.id,
+                                    ),
+                                    idempotency_key=order.idempotency_key
+                                    + "_"
+                                    + inbox_entity.event_type[6:],
+                                )
                         except Exception as e:
                             logger.error(
                                 "Ошибка при обработке Inbox, но продолжаем работу: %s",
@@ -60,22 +76,10 @@ class InboxWorker:
                             )
                             continue
                         await uow.inbox.update(inbox_entity)
-                        await uow.orders.update_order(order)
-                        await uow.commit()
-                        await self.notification_client.create_notification(
-                            NotificationEntity(
-                                user_id=order.user_id,
-                                message=text,
-                                reference_id=order.id,
-                            ),
-                            idempotency_key=order.idempotency_key
-                            + "_"
-                            + inbox_entity.event_type[6:],
-                        )
-                        logger.info(
-                            "InboxWorker - Было обработано %s задач",
-                            len(inbox_entities),
-                        )
+                    logger.info(
+                        "InboxWorker - Было обработано %s задач",
+                        len(inbox_entities),
+                    )
             except Exception as e:
                 logger.error("InboxWorker - Ошибка при обработке inbox-задач: %s", e)
                 await asyncio.sleep(10)
