@@ -29,7 +29,6 @@ class OutboxRepository:
             created_at=outbox.created_at,
         )
         self.session.add(outbox_model)
-        print(f"Outbox добавлен: {outbox_model}")
         return self._to_entity(outbox_model)
 
     async def get_pending_outbox(self) -> list[OutboxEntity]:
@@ -41,7 +40,6 @@ class OutboxRepository:
         outbox_entities = [
             self._to_entity(outbox) for outbox in outbox_models.scalars().all()
         ]
-        print(f"Найдены следующие outbox: {outbox_entities}")
         return outbox_entities
 
     async def update(self, outbox: OutboxEntity) -> OutboxEntity:
@@ -53,5 +51,4 @@ class OutboxRepository:
             created_at=outbox.created_at,
         )
         await self.session.merge(outbox_model)
-        print(f"Outbox мерджед: {outbox_model}")
         return self._to_entity(outbox_model)

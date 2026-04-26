@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.db.session import get_session
 from src.infrastructure.uow import UnitOfWork
-
 from src.application.usecases.order import (
     CreateOrderUseCase,
     GetOrderUseCase,
@@ -13,7 +12,6 @@ from src.application.usecases.order import (
 from src.infrastructure.clients.storage_client import StorageClient
 from src.infrastructure.clients.notification_client import NotificationClient
 from src.infrastructure.clients.payment_client import PaymentClient
-
 import src.settings
 
 

@@ -1,5 +1,7 @@
-import httpx
+import logging
 import urllib.parse
+
+import httpx
 
 from src.core.models import NotificationEntity
 from src.infrastructure.dto.notification import (
@@ -7,6 +9,8 @@ from src.infrastructure.dto.notification import (
     NotificationResponse,
 )
 from src.infrastructure.clients.tools import retry_on_error
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationClient:
@@ -46,7 +50,11 @@ class NotificationClient:
                 headers=headers,
             )
             response.raise_for_status()
-            print("Сообщение отправлено с idempotency_key: ", idempotency_key)
+            logger.info(
+                "Было отправлено уведомление, тип: %s, ключ_идемпотентности: %s",
+                notification.message,
+                idempotency_key,
+            )
             result: NotificationResponse = NotificationResponse.model_validate(
                 response.json()
             )

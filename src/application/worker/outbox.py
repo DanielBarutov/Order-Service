@@ -1,9 +1,13 @@
+import logging
+
 import asyncio
 
 from src.application.ports.broker import KafkaProducerPort
 from src.application.ports.capashino_client import NotificationClientPort
 from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import OutboxEntity, OrderEntity, NotificationEntity
+
+logger = logging.getLogger(__name__)
 
 
 class OutboxWorker:
@@ -18,7 +22,7 @@ class OutboxWorker:
         self.notification_client = notification_client
 
     async def run(self) -> None:
-        print("Outbox worker стартует через 10 секунд")
+        logger.info("OutboxWorker старутет через 10 секунд...")
         await asyncio.sleep(10)
         while True:
             try:
@@ -27,7 +31,6 @@ class OutboxWorker:
                         OutboxEntity
                     ] = await uow.outbox.get_pending_outbox()
                     if not outbox_entities:
-                        print("Нет pending outbox, спим 10 секунд")
                         await asyncio.sleep(10)
                         continue
                     for outbox_entity in outbox_entities:
@@ -38,7 +41,6 @@ class OutboxWorker:
                                 payload=outbox_entity.payload,
                             )
                         outbox_entity: OutboxEntity = outbox_entity.to_completed()
-                        print(f"Outbox обновлен: {outbox_entity}")
                         await uow.outbox.update(outbox_entity)
                         order: OrderEntity = await uow.orders.get_order(
                             outbox_entity.payload["order_id"]
@@ -53,12 +55,10 @@ class OutboxWorker:
                             ),
                             idempotency_key=order.idempotency_key + "_paid",
                         )
-                        await asyncio.sleep(5)
-                        print(
-                            f"Outbox отправлен в репозиторий: {outbox_entity}, спим 5 секунд"
+                        logger.info(
+                            "OutboxWorker - Было обработано %s задач",
+                            len(outbox_entities),
                         )
             except Exception as e:
-                print(
-                    f"Ошибка при отправке outbox: {e}, повторная попытка через 10 секунд"
-                )
+                logger.error("OutboxWorker - Ошибка при обработке outbox-задач: %s", e)
                 await asyncio.sleep(10)

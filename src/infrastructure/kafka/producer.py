@@ -1,7 +1,10 @@
 import json
 import typing
+import logging
 
 from aiokafka import AIOKafkaProducer
+
+logger = logging.getLogger(__name__)
 
 
 class KafkaProducer:
@@ -26,19 +29,19 @@ class KafkaProducer:
         if not self._producer:
             raise RuntimeError("Producer not started")
         try:
-            print(
-                f"Publishing event to topic from producer.py: {topic}, key: {key}, payload: {payload}"
-            )
             metadata = await self._producer.send_and_wait(
                 topic=topic,
                 key=key.encode("utf-8"),
                 value=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
             )
-            print(
-                f"sent topic={metadata.topic} partition={metadata.partition} offset={metadata.offset}"
+            logger.info(
+                "Было отправлено сообщение: topic=%s, partiotion=%s, offset=%s",
+                metadata.topic,
+                metadata.partition,
+                metadata.offset,
             )
         except Exception as e:
-            print(f"Error publishing event: {e}")
+            logger.error("Ошибка при отравке сообщения в Kafka: %s", e)
             raise
 
     async def __aenter__(self) -> "KafkaProducer":

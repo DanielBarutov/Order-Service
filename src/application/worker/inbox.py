@@ -1,8 +1,12 @@
+import logging
+
 import asyncio
 
 from src.application.ports.capashino_client import NotificationClientPort
 from src.application.ports.uow import UnitOfWorkPort
 from src.core.models import InboxEntity, OrderEntity, NotificationEntity
+
+logger = logging.getLogger(__name__)
 
 
 class InboxWorker:
@@ -13,6 +17,8 @@ class InboxWorker:
         self.notification_client = notification_client
 
     async def run(self) -> None:
+        logger.info("InboxWorker старутет через 10 секунд...")
+        await asyncio.sleep(10)
         while True:
             try:
                 async with self.unit_of_work() as uow:
@@ -20,11 +26,9 @@ class InboxWorker:
                         InboxEntity
                     ] = await uow.inbox.get_pending_inbox()
                     if not inbox_entities:
-                        print("Нет pending inbox, спим 10 секунд")
                         await asyncio.sleep(10)
                         continue
                     for inbox_entity in inbox_entities:
-                        print(f"Inbox получен: {inbox_entity}")
                         inbox_entity: InboxEntity = inbox_entity.to_completed()
                         await uow.inbox.update(inbox_entity)
 
@@ -38,7 +42,10 @@ class InboxWorker:
                             order = order.to_cancelled()
                             text = "CANCELLED"
                         else:
-                            print(f"Неизвестный event_type: {inbox_entity.event_type}")
+                            logger.info(
+                                "Был получен статус, который мы не обрабатываем: %s",
+                                inbox_entity.event_type,
+                            )
                             continue
                         await uow.orders.update_order(order)
                         await uow.commit()
@@ -52,6 +59,10 @@ class InboxWorker:
                             + "_"
                             + inbox_entity.event_type[6:],
                         )
-                        print(f"Inbox обновлен: {inbox_entity}")
+                        logger.info(
+                            "InboxWorker - Было обработано %s задач",
+                            len(inbox_entities),
+                        )
             except Exception as e:
-                print(f"Ошибка при получении inbox: {e}")
+                logger.error("InboxWorker - Ошибка при обработке inbox-задач: %s", e)
+                await asyncio.sleep(10)

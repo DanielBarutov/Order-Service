@@ -25,7 +25,7 @@ class PaymentClient:
             created_at=payment.created_at,
         )
 
-    @retry_on_error(max_retries=3)
+    @retry_on_error(max_retries=5)
     async def create_payment(self, payment: PaymentEntity) -> PaymentEntity:
         async with httpx.AsyncClient(timeout=10.0) as client:
             url = urllib.parse.urljoin(self.base_url, "/api/payments")

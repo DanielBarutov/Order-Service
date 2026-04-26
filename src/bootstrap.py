@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import logging
 
 from fastapi import FastAPI
 
@@ -16,6 +17,8 @@ from src.infrastructure.kafka.handlers import (
 )
 from src.infrastructure.uow import UnitOfWork
 from src.infrastructure.clients.notification_client import NotificationClient
+
+logger = logging.getLogger(__name__)
 
 
 class SessionContextAdapter:
@@ -60,7 +63,7 @@ async def lifespan(app: FastAPI):
 
     try:
         await app.state.kafka_consumer.start()
-
+        logger.info("Kafka стартовал...")
         consumer_task = asyncio.create_task(
             app.state.kafka_consumer.run(on_order_shipped, on_order_cancelled)
         )

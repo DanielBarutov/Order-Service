@@ -1,8 +1,12 @@
+import logging
+
 from fastapi import APIRouter, Depends, status
 
 from src.application.usecases.order import OrderCallbackUseCase
 from src.presentation.deps.deps import order_callback_use_case
 from src.presentation.shemas.callback_payment import PaymentCallbackRequestResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,5 +21,5 @@ async def payment_callback(
         request.status,
         request.error_message if request.error_message else None,
     )
-    print("Получен callback платежа:", request.model_dump(mode="json"))
+    logger.info("Получен callback платежа: %s", request.model_dump(mode="json"))
     return {"message": "Payment callback received"}

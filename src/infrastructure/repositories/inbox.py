@@ -29,7 +29,6 @@ class InboxRepository:
             created_at=inbox.created_at,
         )
         self.session.add(inbox_model)
-        print("Inbox добавлен", inbox_model)
         return self._to_entity(inbox_model)
 
     async def get_pending_inbox(self) -> list[InboxEntity]:
@@ -52,5 +51,4 @@ class InboxRepository:
             created_at=inbox.created_at,
         )
         await self.session.merge(inbox_model)
-        print("Inbox мерджед", inbox_model)
         return self._to_entity(inbox_model)

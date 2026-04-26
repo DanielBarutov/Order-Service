@@ -1,6 +1,10 @@
 import json
 import typing
+import logging
+
 from aiokafka import AIOKafkaConsumer
+
+logger = logging.getLogger(__name__)
 
 
 class KafkaConsumer:
@@ -35,9 +39,12 @@ class KafkaConsumer:
                     await on_order_cancelled(data)
                     await self._consumer.commit()
                 else:
-                    print(f"Неизвестное событие: {event_type}")
+                    logger.info(
+                        "Было получено сообщение, но такого статуса мы не обрабатываем: %s",
+                        event_type,
+                    )
             except Exception as e:
-                print(f"Ошибка при обработке события: {e}, Без остановки консьюмера")
+                logger.error("Ошибка при обработке сообщения в Consumer.Kafka: %s", e)
                 await self._consumer.commit()
                 continue
             finally:

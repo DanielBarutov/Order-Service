@@ -1,4 +1,5 @@
 import uuid
+import logging
 
 from src.application.ports.capashino_client import (
     StorageClientPort,
@@ -14,6 +15,9 @@ from src.core.models import (
     OutboxEntity,
     OutboxStatusEnum,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class CreateOrderUseCase:
@@ -56,6 +60,7 @@ class CreateOrderUseCase:
                 ),
                 idempotency_key=order.idempotency_key + "_new",
             )
+            logger.info("Был создан заказ с id=%s", order.id)
             return order
 
 
@@ -97,4 +102,5 @@ class OrderCallbackUseCase:
                 return order
             else:
                 print(f"Неизвестный статус для callback: {status}")
+                logger.error("Был получен неизвестный статус в callback`e: %s", status)
                 raise ValueError(f"Неизвестный статус для callback: {status}")

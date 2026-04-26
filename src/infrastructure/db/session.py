@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 import src.settings
 
 db_url = src.settings.POSTGRES_CONNECTION_STRING
