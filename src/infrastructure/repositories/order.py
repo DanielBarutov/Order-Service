@@ -42,9 +42,9 @@ class OrderRepository:
         order_model = await self.session.execute(
             select(OrderModel).where(OrderModel.id == order_id)
         )
-        if not order_model:
-            raise ValueError(f"Заказ с id {order_id} не найден")
         order: OrderModel = order_model.scalar()
+        if order is None:
+            raise ValueError(f"Заказ с id {order_id} не найден")
         return self._to_entity(order)
 
     async def get_order_by_idempotency_key(
