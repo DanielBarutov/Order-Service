@@ -16,6 +16,7 @@ class InboxRepository:
             event_type=inbox.event_type,
             payload=inbox.payload,
             status=inbox.status,
+            retry=inbox.retry,
             created_at=inbox.created_at,
             completed_at=inbox.completed_at,
         )
@@ -26,6 +27,7 @@ class InboxRepository:
             event_type=inbox.event_type,
             payload=inbox.payload,
             status=inbox.status,
+            retry=inbox.retry,
             created_at=inbox.created_at,
         )
         self.session.add(inbox_model)
@@ -48,6 +50,7 @@ class InboxRepository:
             event_type=inbox.event_type,
             payload=inbox.payload,
             status=inbox.status,
+            retry=inbox.retry,
             created_at=inbox.created_at,
         )
         await self.session.merge(inbox_model)
