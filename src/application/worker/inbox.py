@@ -30,22 +30,28 @@ class InboxWorker:
                         await asyncio.sleep(10)
                         continue
                     for inbox_entity in inbox_entities:
-                        inbox_entity: InboxEntity = inbox_entity.to_completed()
-                        await uow.inbox.update(inbox_entity)
-
-                        order: OrderEntity = await uow.orders.get_order(
-                            uuid.UUID(inbox_entity.payload["order_id"])
-                        )
-                        if inbox_entity.event_type == "order.shipped":
-                            order = order.to_shipped()
-                            text = "SHIPPED"
-                        elif inbox_entity.event_type == "order.cancelled":
-                            order = order.to_cancelled()
-                            text = "CANCELLED"
-                        else:
-                            logger.info(
-                                "Был получен статус, который мы не обрабатываем: %s",
-                                inbox_entity.event_type,
+                        try:
+                            inbox_entity: InboxEntity = inbox_entity.to_completed()
+                            await uow.inbox.update(inbox_entity)
+                            order: OrderEntity = await uow.orders.get_order(
+                                uuid.UUID(inbox_entity.payload["order_id"])
+                            )
+                            if inbox_entity.event_type == "order.shipped":
+                                order = order.to_shipped()
+                                text = "SHIPPED"
+                            elif inbox_entity.event_type == "order.cancelled":
+                                order = order.to_cancelled()
+                                text = "CANCELLED"
+                            else:
+                                logger.info(
+                                    "Был получен статус, который мы не обрабатываем: %s",
+                                    inbox_entity.event_type,
+                                )
+                                continue
+                        except Exception as e:
+                            logger.error(
+                                "Ошибка при обработке Inbox, но продолжаем работу: %s",
+                                e,
                             )
                             continue
                         await uow.orders.update_order(order)
