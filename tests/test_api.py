@@ -44,12 +44,12 @@ class StubOrderCallbackUseCase:
 def _build_app():
     app = FastAPI()
     app.include_router(router)
-    app.dependency_overrides[deps.create_order_use_case] = (
-        lambda: StubCreateOrderUseCase()
+    app.dependency_overrides[deps.create_order_use_case] = lambda: (
+        StubCreateOrderUseCase()
     )
     app.dependency_overrides[deps.get_order_use_case] = lambda: StubGetOrderUseCase()
-    app.dependency_overrides[deps.order_callback_use_case] = (
-        lambda: StubOrderCallbackUseCase()
+    app.dependency_overrides[deps.order_callback_use_case] = lambda: (
+        StubOrderCallbackUseCase()
     )
     return app
 
