@@ -47,6 +47,7 @@ class Inbox(Base):
         nullable=False,
         default=InboxStatusEnum.PENDING,
     )
+    retry = Column(Integer, nullable=True, default=0)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utc_now)
 

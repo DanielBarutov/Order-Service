@@ -32,9 +32,7 @@ async def test_order_repository_get_order_raises_if_missing(mocker):
     session = mocker.Mock()
     session.execute = mocker.AsyncMock(return_value=ScalarResult(None))
     repo = OrderRepository(session)
-
-    with pytest.raises(ValueError, match="не найден"):
-        await repo.get_order(uuid.uuid4())
+    assert await repo.get_order(uuid.uuid4()) is None
 
 
 @pytest.mark.asyncio

@@ -31,11 +31,16 @@ class InboxWorker:
                         continue
                     for inbox_entity in inbox_entities:
                         try:
-                            inbox_entity: InboxEntity = inbox_entity.to_completed()
-                            await uow.inbox.update(inbox_entity)
                             order: OrderEntity = await uow.orders.get_order(
                                 uuid.UUID(inbox_entity.payload["order_id"])
                             )
+                            if order is None:
+                                if inbox_entity.retry > 3:
+                                    inbox_entity: InboxEntity = inbox_entity.to_failed()
+                                else:
+                                    inbox_entity.retry += 1
+                            else:
+                                inbox_entity: InboxEntity = inbox_entity.to_completed()
                             if inbox_entity.event_type == "order.shipped":
                                 order = order.to_shipped()
                                 text = "SHIPPED"
@@ -54,6 +59,7 @@ class InboxWorker:
                                 e,
                             )
                             continue
+                        await uow.inbox.update(inbox_entity)
                         await uow.orders.update_order(order)
                         await uow.commit()
                         await self.notification_client.create_notification(

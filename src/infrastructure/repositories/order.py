@@ -44,7 +44,7 @@ class OrderRepository:
         )
         order: OrderModel = order_model.scalar()
         if order is None:
-            raise ValueError(f"Заказ с id {order_id} не найден")
+            return None
         return self._to_entity(order)
 
     async def get_order_by_idempotency_key(

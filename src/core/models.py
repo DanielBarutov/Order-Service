@@ -81,6 +81,7 @@ class NotificationEntity:
 class InboxStatusEnum(enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class OutboxStatusEnum(enum.Enum):
@@ -94,6 +95,7 @@ class InboxEntity:
     event_type: str = dataclasses.field(default="")
     payload: dict = dataclasses.field(default_factory=dict)
     status: InboxStatusEnum = dataclasses.field(default=InboxStatusEnum.PENDING)
+    retry: int = dataclasses.field(default=0)
     completed_at: datetime.datetime | None = dataclasses.field(default=None)
     created_at: datetime.datetime = dataclasses.field(default_factory=utc_now)
 
@@ -101,6 +103,13 @@ class InboxEntity:
         return dataclasses.replace(
             self,
             status=InboxStatusEnum.COMPLETED,
+            completed_at=utc_now(),
+        )
+
+    def to_failed(self) -> "InboxEntity":
+        return dataclasses.replace(
+            self,
+            status=InboxStatusEnum.FAILED,
             completed_at=utc_now(),
         )
 

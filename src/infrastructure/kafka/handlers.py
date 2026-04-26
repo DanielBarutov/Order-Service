@@ -21,6 +21,7 @@ async def handle_order_shipped(event: dict, unit_of_work: UnitOfWork) -> None:
                 event_type="order.shipped",
                 payload=event,
                 status=InboxStatusEnum.PENDING,
+                retry=0,
                 created_at=utc_now(),
             )
             await uow.inbox.create(inbox)
