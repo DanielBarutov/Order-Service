@@ -44,7 +44,6 @@ class InboxWorker:
                                     )
                                 else:
                                     inbox_entity.retry += 1
-                                    await uow.orders.update_order(order)
                                     await uow.inbox.update(inbox_entity)
                             else:
                                 inbox_entity: InboxEntity = inbox_entity.to_completed()
