@@ -37,14 +37,12 @@ class InboxWorker:
                             if order is None:
                                 if inbox_entity.retry > 3:
                                     inbox_entity: InboxEntity = inbox_entity.to_failed()
-                                    await uow.inbox.update(inbox_entity)
                                     logger.info(
                                         "Inbox c id=%s, был выставлен статус FAILED после 3 попыток",
                                         inbox_entity.id,
                                     )
                                 else:
                                     inbox_entity.retry += 1
-                                    await uow.inbox.update(inbox_entity)
                             else:
                                 inbox_entity: InboxEntity = inbox_entity.to_completed()
                                 if inbox_entity.event_type == "order.shipped":
@@ -58,7 +56,6 @@ class InboxWorker:
                                         "Был получен статус, который мы не обрабатываем: %s",
                                         inbox_entity.event_type,
                                     )
-                                    continue
                                 await uow.orders.update_order(order)
                                 await uow.commit()
                                 await self.notification_client.create_notification(
@@ -78,6 +75,7 @@ class InboxWorker:
                             )
                             continue
                         await uow.inbox.update(inbox_entity)
+                        await uow.commit()
                     logger.info(
                         "InboxWorker - Было обработано %s задач",
                         len(inbox_entities),
